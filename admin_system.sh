@@ -51,6 +51,6 @@ case $choix in
 3) set_permission ;;
 4) set_quota ;;
 5) echo "Au revoir" exit ;;
-*) echo ">:(" ;;
+*) echo "error de saisie" ;;
 esac
 
