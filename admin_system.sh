@@ -2,6 +2,12 @@
 
 # admin_system.sh
 
+# base de donnes
+show_bd_etudiants() {
+echo "--- LISTE DES ETUDIANTS ---"
+docker exec -i mysql_server mysql -u root -p'root_password_fst' -D liu_db -e "SELECT * FROM etudiants;"
+}
+
 # creation le account
 create_user() {
 echo "Entrez le nom de username:"
@@ -38,11 +44,12 @@ sudo setquota -u $username 0  ${taille_quota}M ${taille_quota}M 00 -a
 # menu
 echo "Menu d'Adminstration"
 echo "1. créer un nouvel username"
-echo "2. créér un dossier"
+echo "2. créer un dossier"
 echo "3. définir les permissions"
 echo "4. définir le taille de quota"
-echo "5. quitter"
-echo "Choississez une option (1-5):"
+echo "5. voir les étudiants (BD)"
+echo "6. Quitter"
+echo "Choississez une option (1-6):"
 read choix
 
 case $choix in 
@@ -50,7 +57,8 @@ case $choix in
 2) create_dossier ;;
 3) set_permission ;;
 4) set_quota ;;
-5) echo "Au revoir" exit ;;
+5)show_bd_etudiants ;;
+6) echo "Au revoir" && exit ;;
 *) echo "error de saisie" ;;
 esac
 
