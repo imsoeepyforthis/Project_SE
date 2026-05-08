@@ -29,16 +29,19 @@ echo "Dossier créé dans /home/$username/$nom_dossier"
 set_permission() {
 echo "Entrez le chemin du dossier:"
 read chemin_dossier
+echo "Quel utilisateur doi posséder ce dossier?"
+read proprietaire 
 sudo chmod 755 $chemin_dossier
-sudo chown $username:$username $nom_dossier
+sudo chown $proprietaire:$proprietaire $chemin_dossier
 echo "permissions définies avec succés!"
 }
 
 # quota (ha4e le 7ajem kemeye men memoire r eli lhi t36i le user)
 set_quota() {
-echo "Entrez le quota disque en MB pour $username:"
-read taille_quota
-sudo setquota -u $username 0  ${taille_quota}M ${taille_quota}M 00 -a
+read -p "Entrez le nom de user:" username
+read -p  "Entrez le quota disque en MB pour $username:" taille_quota
+sudo setquota -u $username 0 ${taille_quota}M 0 0 -a
+echo "quota de ${taille_quota}MB appliqué à $username"
 }
 
 # menu
