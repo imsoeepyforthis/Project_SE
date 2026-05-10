@@ -9,7 +9,7 @@ services:
     ports:
       - "3306:3306"
 
-# ha4e kank teconctih 3le apache server
+  # ha4e kank teconctih 3le apache server
   webserver:
     image: httpd:latest
     container_name: apache_server
@@ -17,3 +17,14 @@ services:
       - "8080:80"
     depends_on:
       - database
+
+  # Lab principal Bash ( Debian )
+  lab-bash:
+    image: debian:stable-slim
+    container_name: debian_lab
+    tty: true
+    stdin_open: true
+    command: bash
+    depends_on: 
+      - database
+      - webserver 
