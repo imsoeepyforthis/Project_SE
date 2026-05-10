@@ -28,3 +28,10 @@ services:
     depends_on: 
       - database
       - webserver 
+
+security-lab:
+    image: kalilinux/kali-rolling
+    container_name: kali_lab
+    tty: true
+    stdin_open: true
+
