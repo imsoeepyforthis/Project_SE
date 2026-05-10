@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0
+    container_name: mysql_server
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_fst
+    ports:
+      - "3306:3306"
+
+# ha4e kank teconctih 3le apache server
+  webserver:
+    image: httpd:latest
+    container_name: apache_server
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
