@@ -29,7 +29,7 @@ services:
       - database
       - webserver 
 
-security-lab:
+  security-lab:
     image: kalilinux/kali-rolling
     container_name: kali_lab
     tty: true
