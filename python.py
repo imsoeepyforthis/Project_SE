@@ -1,5 +1,6 @@
 from collections import deque
 
+# ================== CLASS PROCESS ==================
 class Process:
     def __init__(self, pid, arrival, burst):
         self.pid = pid
@@ -9,7 +10,8 @@ class Process:
         self.completion = 0
 
 
-# ------------------ ROUND ROBIN ------------------
+
+# ================== ROUND ROBIN ==================
 def round_robin(processes, quantum):
     time = 0
     queue = deque()
@@ -20,16 +22,21 @@ def round_robin(processes, quantum):
     i = 0
 
     while queue or i < len(processes):
+
+        # Ajouter les processus arrivés
         while i < len(processes) and processes[i].arrival <= time:
             queue.append(processes[i])
             i += 1
 
+        # CPU idle
         if not queue:
             time += 1
             continue
 
         current = queue.popleft()
+
         start_time = time
+
         execution_time = min(quantum, current.remaining)
 
         time += execution_time
@@ -37,10 +44,12 @@ def round_robin(processes, quantum):
 
         gantt.append((current.pid, start_time, time))
 
+        # Ajouter nouveaux processus
         while i < len(processes) and processes[i].arrival <= time:
             queue.append(processes[i])
             i += 1
 
+        # Replacer dans queue ou terminer
         if current.remaining > 0:
             queue.append(current)
         else:
@@ -50,29 +59,40 @@ def round_robin(processes, quantum):
     return gantt, completed
 
 
-# ------------------ SRTF ------------------
+# ================== SRTF ==================
 def srtf(processes):
+
     time = 0
-    completed = []
     gantt = []
+    completed = []
+
     n = len(processes)
     finished_count = 0
 
     while finished_count < n:
-        available = [p for p in processes if p.arrival <= time and p.remaining > 0]
 
+        available = [
+            p for p in processes
+            if p.arrival <= time and p.remaining > 0
+        ]
+
+        # CPU idle
         if not available:
             time += 1
             continue
 
+        # plus petit remaining time
         current = min(available, key=lambda p: p.remaining)
 
         start_time = time
+
+        # Exécution 1 unité
         time += 1
         current.remaining -= 1
 
         gantt.append((current.pid, start_time, time))
 
+        # Vérifier fin
         if current.remaining == 0:
             current.completion = time
             completed.append(current)
@@ -81,23 +101,95 @@ def srtf(processes):
     return gantt, completed
 
 
-# ------------------ METRICS ------------------
+# ================== METRICS ==================
 def calculate_metrics(processes):
+
     total_waiting = 0
 
+    print("\nWaiting Times:")
+
     for p in processes:
+
         turnaround = p.completion - p.arrival
+
         waiting = turnaround - p.burst
+
         total_waiting += waiting
-        print(f"{p.pid}: Waiting Time = {waiting}")
 
-    avg = total_waiting / len(processes)
-    print(f"\nAverage Waiting Time = {avg}")
+        print(f"{p.pid} -> Waiting Time = {waiting}")
+
+    avg_waiting = total_waiting / len(processes)
+
+    print(f"\nAverage Waiting Time = {avg_waiting}")
+
+    return avg_waiting
 
 
-# ------------------ MAIN TEST ------------------
+# ================== GANTT DIAGRAM ==================
+def compress_gantt(gantt):
+
+    compressed = []
+
+    for p in gantt:
+
+        if not compressed:
+            compressed.append(list(p))
+
+        elif compressed[-1][0] == p[0]:
+            compressed[-1][2] = p[2]
+
+        else:
+            compressed.append(list(p))
+
+    return compressed
+
+
+def print_gantt(gantt):
+
+    gantt = compress_gantt(gantt)
+
+    print("\nGantt Diagram:\n")
+
+    # Ligne des processus
+    for p in gantt:
+        print(f"|  {p[0]}  ", end="")
+
+    print("|")
+
+    # Ligne des temps
+    print(gantt[0][1], end="")
+
+    for p in gantt:
+        print(f"      {p[2]}", end="")
+
+    print("\n")
+
+
+# ================== COMPARISON ==================
+def compare_algorithms(rr_avg, srtf_avg):
+
+    print("\n================ COMPARISON ================\n")
+
+    print(f"Round Robin Average Waiting Time : {rr_avg}")
+
+    print(f"SRTF Average Waiting Time        : {srtf_avg}")
+
+    print()
+
+    if rr_avg < srtf_avg:
+        print("Round Robin is better for this dataset.")
+
+    elif srtf_avg < rr_avg:
+        print("SRTF is better for this dataset.")
+
+    else:
+        print("Both algorithms have same performance.")
+
+
+# ================== MAIN ==================
 def main():
-    # IMPORTANT: create fresh copies for each algorithm
+
+    # RR processes
     processes1 = [
         Process("P1", 0, 7),
         Process("P2", 2, 4),
@@ -105,6 +197,7 @@ def main():
         Process("P4", 5, 4),
     ]
 
+    # SRTF processes
     processes2 = [
         Process("P1", 0, 7),
         Process("P2", 2, 4),
@@ -112,21 +205,26 @@ def main():
         Process("P4", 5, 4),
     ]
 
-    print("=== ROUND ROBIN ===")
+    # ================= RR =================
+    print("\n========== ROUND ROBIN ==========")
+
     gantt_rr, completed_rr = round_robin(processes1, quantum=2)
 
-    for g in gantt_rr:
-        print(g)
+    print_gantt(gantt_rr)
 
-    calculate_metrics(completed_rr)
+    rr_avg = calculate_metrics(completed_rr)
 
-    print("\n=== SRTF ===")
+    # ================= SRTF =================
+    print("\n========== SRTF ==========")
+
     gantt_srtf, completed_srtf = srtf(processes2)
 
-    for g in gantt_srtf:
-        print(g)
+    print_gantt(gantt_srtf)
 
-    calculate_metrics(completed_srtf)
+    srtf_avg = calculate_metrics(completed_srtf)
+
+    # ================= COMPARISON =================
+    compare_algorithms(rr_avg, srtf_avg)
 
 
 if __name__ == "__main__":
